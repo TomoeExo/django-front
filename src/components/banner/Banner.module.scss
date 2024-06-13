@@ -1,0 +1,4 @@
+.bg_banner {
+	@apply h-[350px] max-w-[1090px] w-full p-16 items-center flex rounded-2xl mt-2 sm:p-8;
+	background-image: url('/banner.png');
+}

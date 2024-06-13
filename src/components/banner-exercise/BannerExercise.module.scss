@@ -1,0 +1,7 @@
+.bg_banner {
+	@apply h-[350px] max-w-[1090px] w-full p-16 items-center flex rounded-2xl mt-2;
+	background-image: url('/banner_exercise.png');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
