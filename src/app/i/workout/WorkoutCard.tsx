@@ -4,21 +4,27 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 
-import { TypeWorkoutFormState } from '@/types/workout.types'
-
 import { useUpdateWorkout } from './hooks/useUpdateWorkout'
 
 export const WorkoutCard: React.FC<any> = ({ item }) => {
-	const [isFavorite, setIsFavorite] = useState(item.isFavorite)
+	const [isFavorite, setIsFavorite] = useState(item.is_favorite)
+
 	const { updateWorkout } = useUpdateWorkout()
 
 	const handleFavoriteToggle = async (e: React.MouseEvent) => {
 		e.preventDefault()
-		const updatedData: Partial<TypeWorkoutFormState> = {
-			...item,
-			isFavorite: !isFavorite
-		}
-		updateWorkout({ workoutId: item.id, formData: updatedData })
+
+		// Создаем экземпляр FormData
+		const formData = new FormData()
+
+		// Заполняем FormData данными
+		formData.append('is_favorite', JSON.stringify(!isFavorite))
+		formData.append('title', item.title)
+		formData.append('type', JSON.stringify(item.type))
+		formData.append('duration', item.duration.toString())
+
+		// Передаем formData в updateWorkout
+		updateWorkout({ workoutId: item.id, formData })
 		setIsFavorite(!isFavorite)
 	}
 

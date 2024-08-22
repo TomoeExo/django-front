@@ -86,7 +86,6 @@ export function ChatList() {
 			setLoading(false)
 		}
 	}
-
 	const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setMessage(e.target.value)
 	}
@@ -95,9 +94,20 @@ export function ChatList() {
 		if (!message.trim()) return // Не отправляем пустые сообщения
 		setIsSending(true)
 
+		const userMessage: any = {
+			content: message,
+			role: 'user'
+		}
+		setMessages(prevMessages => [...prevMessages, userMessage])
+
 		try {
 			const newMessage = await chatService.updateChat(selectedChatId!, message)
-			setMessages(prevMessages => [...prevMessages, newMessage])
+			const transformedMessage: any = {
+				content: newMessage.message.find(([key]: any) => key === 'content')[1],
+				role: newMessage.message.find(([key]: any) => key === 'role')[1]
+			}
+
+			setMessages(prevMessages => [...prevMessages, transformedMessage])
 			setMessage('')
 		} catch (error) {
 			console.log('Failed to send message:', error)
@@ -105,7 +115,6 @@ export function ChatList() {
 			setIsSending(false)
 		}
 	}
-
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault()
@@ -135,20 +144,28 @@ export function ChatList() {
 						</button>
 						<ul className='flex flex-col gap-3'>
 							{chatList.map(chat => (
-								<li
-									className='flex max-w-80 w-full justify-between px-5 py-3 border border-COLORS-stroke_main rounded-md'
+								<div
 									key={chat.id}
+									className='flex justify-between'
 								>
-									<button onClick={() => handleChatClick(chat.id)}>
-										{chat.name || chat.id}
+									<button
+										className='w-full'
+										onClick={() => handleChatClick(chat.id)}
+									>
+										<li
+											className='flex max-w-80 w-full justify-between px-5 py-3 border border-COLORS-stroke_main rounded-md'
+											key={chat.id}
+										>
+											{chat.name || chat.id}
+										</li>
 									</button>
 									<button
-										className='text-white/60'
+										className='text-white/60 px-2'
 										onClick={() => handleChatDelete(chat.id)}
 									>
 										<Trash2 />
 									</button>
-								</li>
+								</div>
 							))}
 						</ul>
 					</div>

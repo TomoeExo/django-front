@@ -14,9 +14,10 @@ export interface IWorkoutResponse {
 	type: string[]
 	duration?: number
 	tags: string[]
-	isFavorite?: boolean
+	is_favorite?: boolean
 	completed?: boolean
 	exercises: IExercise[]
+	workout_img: File | string | null
 }
 
 export interface TypeWorkoutFormState {
@@ -26,7 +27,8 @@ export interface TypeWorkoutFormState {
 	type?: string[]
 	duration?: number
 	tags?: string[]
-	isFavorite?: boolean
+	is_favorite?: boolean
 	completed?: boolean
 	exercises: IExercise[]
+	workout_img: File | string | null
 }

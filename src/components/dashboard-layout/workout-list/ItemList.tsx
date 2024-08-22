@@ -7,8 +7,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
-import { TypeWorkoutFormState } from '@/types/workout.types'
-
 import { useUpdateWorkout } from '@/app/i/workout/hooks/useUpdateWorkout'
 
 export function ItemList({ data, isLoading }: any) {
@@ -46,11 +44,18 @@ function WorkoutItem({ item }: { item: any }) {
 
 	const handleFavoriteToggle = async (e: React.MouseEvent) => {
 		e.preventDefault()
-		const updatedData: Partial<TypeWorkoutFormState> = {
-			...item,
-			isFavorite: !isFavorite
-		}
-		updateWorkout({ workoutId: item.id, formData: updatedData })
+
+		// Создаем экземпляр FormData
+		const formData = new FormData()
+
+		// Заполняем FormData данными
+		formData.append('is_favorite', JSON.stringify(!isFavorite))
+		formData.append('title', item.title)
+		formData.append('type', JSON.stringify(item.type))
+		formData.append('duration', item.duration.toString())
+
+		// Передаем formData в updateWorkout
+		updateWorkout({ workoutId: item.id, formData })
 		setIsFavorite(!isFavorite)
 	}
 

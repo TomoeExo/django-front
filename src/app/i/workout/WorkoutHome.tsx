@@ -7,6 +7,7 @@ import { DashboardHeader } from '@/components/dashboard-layout/header/DashboardH
 import { TopWorkoutContainer } from '@/components/dashboard-layout/top-workout/TopWorkoutContainer'
 
 import { useCompleted } from '@/hooks/useCompleted'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useWorkouts } from '@/hooks/useWorkouts'
 
 import { SearchWorkouts } from './SearchWorkouts'
@@ -17,9 +18,37 @@ export function WorkoutHome() {
 	const [workouts, setWorkouts] = useState<any[]>([])
 	const { data: completedData, isLoading: completedLoading } = useCompleted()
 	const { data: workoutData, isLoading: workoutLoading } = useWorkouts()
+	const is3xl = useMediaQuery('(max-width: 1870px)') // Adjust the width for 3xl as necessary
+
+	// Создаем карту тренировок
+	const workoutMap = new Map(
+		(workoutData || []).map((workout: any) => [workout.id, workout])
+	)
+
 	// Фильтруем избранные тренировки
 	const favoriteWorkouts =
-		workoutData?.filter((workout: any) => workout.isFavorite) || []
+		workoutData?.filter((workout: any) => workout.is_favorite) || []
+
+	const slicedFavoriteWorkouts = is3xl
+		? favoriteWorkouts.slice(0, 2)
+		: favoriteWorkouts.slice(0, 2)
+
+	const slicedCompletedData = is3xl
+		? completedData?.slice(0, 2)
+		: completedData?.slice(0, 5)
+
+	const completedWorkoutsData = (slicedCompletedData || [])
+		.map((completed: any) => {
+			const workout = workoutMap.get(completed.workout)
+			return workout
+				? {
+						...workout,
+						total_seconds: completed.total_seconds,
+						completed_at: completed.completed_at
+					}
+				: null
+		})
+		.filter((workout: any) => workout !== null)
 
 	return (
 		<>
@@ -37,7 +66,7 @@ export function WorkoutHome() {
 					linkHref={`/i/workout/favorites`}
 					isFavorite={true}
 					workoutItemProps={{
-						data: favoriteWorkouts.slice(0, 3),
+						data: slicedFavoriteWorkouts,
 						isLoading: workoutLoading
 					}}
 				/>
@@ -48,7 +77,7 @@ export function WorkoutHome() {
 					title='History'
 					linkHref={`/i/workout/history`}
 					workoutItemProps={{
-						data: completedData?.slice(0, 5),
+						data: completedWorkoutsData,
 						isLoading: completedLoading
 					}}
 				/>

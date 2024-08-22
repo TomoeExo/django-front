@@ -11,10 +11,10 @@ export interface FavoriteItemDto {
 }
 
 export interface IAuthForm {
-	name?: string
+	username?: string
 	email: string
 	password: string
-	repeat_password: string
+	password2: string
 	subscription: ISubscriptionType
 }
 
@@ -26,7 +26,7 @@ interface UserDetails {
 }
 
 interface UserSubscription {
-	subscriptionType?: string
+	subscription_type?: string
 	description?: string
 	descriptionRequests?: number
 	chatRequests?: number
@@ -34,16 +34,21 @@ interface UserSubscription {
 
 export interface IUser {
 	id: number
-	name?: string
+	username?: string
 	email: string
-	avatarImg?: string
+	avatar_img?: File | string | null
 	details?: UserDetails
 	subscription?: UserSubscription
 }
 
 export interface IAuthResponse {
-	accessToken: string
+	access: string
+	// refresh: string
 	user: IUser
 }
 
 export type TypeUserForm = Omit<IUser, 'id'> & { password?: string }
+export type TypeUserFormWithFile = Omit<IUser, 'id'> & {
+	password?: string
+	avatar_img?: File | string | null
+}

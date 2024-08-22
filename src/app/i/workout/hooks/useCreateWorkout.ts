@@ -1,7 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { TypeWorkoutFormState } from '@/types/workout.types'
-
 import { workoutService } from '@/services/workout.service'
 
 export function useCreateWorkout() {
@@ -9,9 +7,7 @@ export function useCreateWorkout() {
 
 	const { mutate: createWorkout } = useMutation({
 		mutationKey: ['create workout'],
-		mutationFn: async (data: TypeWorkoutFormState) => {
-			const { exercises, ...rest } = data
-
+		mutationFn: async (data: FormData) => {
 			await workoutService.create(data)
 		},
 		onSuccess() {

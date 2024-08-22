@@ -17,8 +17,8 @@ export const useUpload: TypeUpload = (onChange, folder) => {
 	const { mutateAsync } = useMutation({
 		mutationKey: ['upload file'],
 		mutationFn: (data: FormData) => FileService.upload(data, folder),
-		onSuccess({ data }) {
-			onChange(data.url)
+		onSuccess({ data }: any) {
+			onChange(data)
 		}
 	})
 
@@ -26,14 +26,10 @@ export const useUpload: TypeUpload = (onChange, folder) => {
 		async (e: ChangeEvent<HTMLInputElement>) => {
 			setIsLoading(true)
 			const file = e.target.files
-			if (file) {
+			if (file && file.length > 0) {
 				const formData = new FormData()
 				formData.append('file', file[0])
 				await mutateAsync(formData)
-
-				setTimeout(() => {
-					setIsLoading(false)
-				}, 1000)
 			}
 			setIsLoading(false)
 		},

@@ -12,10 +12,15 @@ import { useWorkouts } from '@/hooks/useWorkouts'
 
 export function Home() {
 	const { data: completedData, isLoading: completedLoading } = useCompleted()
+
 	const { data: workoutData, isLoading: workoutLoading } = useWorkouts()
 	const is3xl = useMediaQuery('(max-width: 1870px)') // Adjust the width for 3xl as necessary
 	const favoriteWorkouts =
-		workoutData?.filter((workout: any) => workout.isFavorite) || []
+		workoutData?.filter((workout: any) => workout.is_favorite) || []
+
+	const workoutMap = new Map(
+		(workoutData || []).map((workout: any) => [workout.id, workout])
+	)
 
 	const slicedFavoriteWorkouts = is3xl
 		? favoriteWorkouts.slice(0, 2)
@@ -23,6 +28,20 @@ export function Home() {
 	const slicedCompletedData = is3xl
 		? completedData?.slice(0, 2)
 		: completedData?.slice(0, 5)
+
+	const completedWorkoutsData = (slicedCompletedData || [])
+		.map((completed: any) => {
+			const workout = workoutMap.get(completed.workout)
+			return workout
+				? {
+						...workout,
+						total_seconds: completed.total_seconds,
+						completed_at: completed.completed_at
+					}
+				: null
+		})
+		.filter((workout: any) => workout !== null)
+
 	return (
 		<>
 			<DashboardHeader
@@ -49,7 +68,7 @@ export function Home() {
 						title='History'
 						linkHref={`/i/workout/history`}
 						workoutItemProps={{
-							data: slicedCompletedData,
+							data: completedWorkoutsData,
 							isLoading: completedLoading
 						}}
 					/>

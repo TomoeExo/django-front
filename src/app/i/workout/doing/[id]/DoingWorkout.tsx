@@ -11,10 +11,7 @@ import { useCreateCompletedWorkout } from '@/hooks/useCompletedWorkouts'
 import { useWorkout } from '@/hooks/useWorkout'
 
 export function DoingWorkout({ workoutId }: { workoutId: string }) {
-	console.log('workoutId: ', workoutId)
-
 	const { data, isLoading } = useWorkout(workoutId)
-	console.log(JSON.stringify(data, null, 2))
 
 	const {
 		create: completeWorkout,
@@ -22,7 +19,7 @@ export function DoingWorkout({ workoutId }: { workoutId: string }) {
 		error: completeError
 	} = useCreateCompletedWorkout()
 	const [completedExercises, setCompletedExercises] = useState<boolean[]>([])
-	const [time, setTime] = useState(0)
+	const [total_seconds, setTotalSeconds] = useState(0)
 	const [isRunning, setIsRunning] = useState(false)
 	const workoutCompleted = useRef(false)
 
@@ -36,13 +33,13 @@ export function DoingWorkout({ workoutId }: { workoutId: string }) {
 		let interval: any
 		if (isRunning) {
 			interval = setInterval(() => {
-				setTime(prevTime => prevTime + 1)
+				setTotalSeconds(prevTime => prevTime + 1)
 			}, 1000)
-		} else if (!isRunning && time !== 0) {
+		} else if (!isRunning && total_seconds !== 0) {
 			clearInterval(interval)
 		}
 		return () => clearInterval(interval)
-	}, [isRunning, time])
+	}, [isRunning, total_seconds])
 
 	const handleExerciseComplete = (index: number) => {
 		setCompletedExercises(prev => {
@@ -63,7 +60,9 @@ export function DoingWorkout({ workoutId }: { workoutId: string }) {
 	}
 
 	const handleWorkoutComplete = async () => {
-		await completeWorkout(workoutId, time)
+		const completed_at = new Date().toISOString()
+		const workout = workoutId
+		await completeWorkout({ workout, total_seconds, completed_at })
 		alert('Workout Completed!')
 	}
 
@@ -120,10 +119,10 @@ export function DoingWorkout({ workoutId }: { workoutId: string }) {
 							<div className='flex gap-4  ml-28 sm:-order-1 sm:ml-0 sm:my-3 rounded-md '>
 								<div className='flex flex-col items-center gap-2'>
 									<span className='text-3xl font-medium'>{`${Math.floor(
-										time / 60
+										total_seconds / 60
 									)
 										.toString()
-										.padStart(2, '0')}:${(time % 60)
+										.padStart(2, '0')}:${(total_seconds % 60)
 										.toString()
 										.padStart(2, '0')}`}</span>
 									<Button

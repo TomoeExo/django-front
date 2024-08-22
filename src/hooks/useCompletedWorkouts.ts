@@ -1,16 +1,19 @@
 // hooks/useCompletedWorkouts.ts
 import { useEffect, useState } from 'react'
 
-import { completedService } from '@/services/compelted.service'
+import {
+	IWorkoutCompleted,
+	completedService
+} from '@/services/compelted.service'
 
 export const useCreateCompletedWorkout = () => {
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
-	const create = async (workoutId: string, totalSeconds: number) => {
+	const create = async (workoutCompleted: IWorkoutCompleted) => {
 		setLoading(true)
 		try {
-			await completedService.create(workoutId, totalSeconds)
+			await completedService.create(workoutCompleted)
 		} catch (err: any) {
 			setError(err.message)
 		} finally {

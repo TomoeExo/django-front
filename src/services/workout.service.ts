@@ -1,9 +1,9 @@
-import { IWorkoutResponse, TypeWorkoutFormState } from '@/types/workout.types'
+import { IWorkoutResponse } from '@/types/workout.types'
 
 import { axiosWithAuth } from '@/api/interceptors'
 
 class WorkoutService {
-	private BASE_URL = '/user/workout'
+	private BASE_URL = '/user/workout/'
 
 	async getAll() {
 		const response = await axiosWithAuth.get(this.BASE_URL)
@@ -13,7 +13,7 @@ class WorkoutService {
 	async getWorkout(workoutId: string) {
 		try {
 			const response = await axiosWithAuth.get<IWorkoutResponse>(
-				`${this.BASE_URL}/update/${workoutId}`
+				`${this.BASE_URL}${workoutId}`
 			)
 			return response.data
 		} catch (error) {
@@ -22,9 +22,13 @@ class WorkoutService {
 		}
 	}
 
-	async create(data: TypeWorkoutFormState) {
+	async create(data: FormData) {
 		try {
-			const response = await axiosWithAuth.post(this.BASE_URL, data)
+			const response = await axiosWithAuth.post(this.BASE_URL, data, {
+				headers: {
+					'Content-Type': 'multipart/form-data'
+				}
+			})
 			return response.data
 		} catch (error) {
 			console.error('Error creating workout:', error)
@@ -32,13 +36,16 @@ class WorkoutService {
 		}
 	}
 
-	async update(workoutId: string, data: Partial<TypeWorkoutFormState>) {
+	async update(workoutId: string, data: FormData) {
 		try {
-			console.log(JSON.stringify(data, null, 2))
-
 			const response = await axiosWithAuth.put(
-				`${this.BASE_URL}/update/${workoutId}`,
-				data
+				`${this.BASE_URL}${workoutId}/`,
+				data,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data'
+					}
+				}
 			)
 			return response.data
 		} catch (error) {
@@ -50,7 +57,7 @@ class WorkoutService {
 	async delete(workoutId: string) {
 		try {
 			const response = await axiosWithAuth.delete(
-				`${this.BASE_URL}/${workoutId}`
+				`${this.BASE_URL}${workoutId}`
 			)
 			return response.data
 		} catch (error) {

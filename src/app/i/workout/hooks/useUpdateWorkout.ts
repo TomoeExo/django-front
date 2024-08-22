@@ -1,7 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { TypeWorkoutFormState } from '@/types/workout.types'
-
 import { workoutService } from '@/services/workout.service'
 
 export function useUpdateWorkout() {
@@ -14,7 +12,7 @@ export function useUpdateWorkout() {
 			formData
 		}: {
 			workoutId: string
-			formData: Partial<TypeWorkoutFormState>
+			formData: FormData
 		}) => {
 			return workoutService.update(workoutId, formData)
 		},

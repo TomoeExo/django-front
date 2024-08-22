@@ -7,25 +7,30 @@ import { removeFromStorage, saveTokenStorage } from './auth-token.service'
 export const authService = {
 	async main(type: 'login' | 'register', data: IAuthForm) {
 		const response = await axiosClassic.post<IAuthResponse>(
-			`/auth/${type}`,
+			`user/${type}/`,
 			data
 		)
-		if (response.data.accessToken) saveTokenStorage(response.data.accessToken)
+
+		if (response.data.access) {
+			saveTokenStorage(response.data.access)
+		}
 
 		return response
 	},
 
 	async getNewTokens() {
 		const response = await axiosClassic.post<IAuthResponse>(
-			'/auth/login/access-token'
+			'user/token/refresh/'
 		)
-		if (response.data.accessToken) saveTokenStorage(response.data.accessToken)
+		if (response.data.access) {
+			saveTokenStorage(response.data.access)
+		}
 
 		return response
 	},
 
 	async logout() {
-		const response = await axiosClassic.post<boolean>('/auth/logout')
+		const response = await axiosClassic.post<boolean>('user/logout/')
 		if (response.data) removeFromStorage()
 
 		return response

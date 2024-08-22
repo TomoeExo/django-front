@@ -19,7 +19,7 @@ export function FavoriteWorkout() {
 		return <div>Loading...</div> // Возвращаем заглушку во время загрузки
 	}
 
-	const favorites = workouts.filter((workout: any) => workout.isFavorite) // Фильтруем избранные тренировки
+	const favorites = workouts.filter((workout: any) => workout.is_favorite) // Фильтруем избранные тренировки
 
 	if (!favorites || favorites.length === 0) {
 		return <div>No saved workouts found</div> // Возвращаем заглушку, если нет избранных тренировок

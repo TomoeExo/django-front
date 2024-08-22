@@ -8,25 +8,53 @@ import {
 import { authService } from '@/services/auth.service'
 
 const options: CreateAxiosDefaults = {
-	baseURL: process.env.SERVER_URL,
+	baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
 	headers: {
-		'Content-Type': 'application/json'
+		'Content-Type': 'application/json',
+		Accept: 'application/json'
 	},
-	withCredentials: true
+	withCredentials: true // Включение учетных данных (куки)
 }
+
 const axiosClassic = axios.create(options)
 const axiosWithAuth = axios.create(options)
 
-axiosWithAuth.interceptors.request.use(config => {
-	const accessToken = getAccessToken()
+// Function to get CSRF token from cookie
+function getCSRFToken() {
+	const csrfCookie = document.cookie
+		.split('; ')
+		.find(row => row.startsWith('csrftoken='))
+	return csrfCookie ? csrfCookie.split('=')[1] : null
+}
 
-	if (config?.headers && accessToken)
-		config.headers.Authorization = `Bearer ${accessToken}`
+// Adding CSRF token to all requests made by axiosClassic
+axiosClassic.interceptors.request.use(config => {
+	const csrfToken = getCSRFToken()
+
+	if (config.headers && csrfToken) {
+		config.headers['X-CSRFToken'] = csrfToken
+	}
 	return config
 })
+
+// Adding authorization header and CSRF token to all requests made by axiosWithAuth
+axiosWithAuth.interceptors.request.use(config => {
+	const access = getAccessToken()
+	const csrfToken = getCSRFToken()
+
+	if (config?.headers) {
+		if (access) {
+			config.headers.Authorization = `Bearer ${access}`
+		}
+		if (csrfToken) {
+			config.headers['X-CSRFToken'] = csrfToken
+		}
+	}
+	return config
+})
+
 axiosWithAuth.interceptors.response.use(
 	config => config,
-
 	async error => {
 		const originalRequest = error.config
 
@@ -40,6 +68,7 @@ axiosWithAuth.interceptors.response.use(
 			originalRequest._isRetry = true
 			try {
 				await authService.getNewTokens()
+
 				return axiosWithAuth.request(originalRequest)
 			} catch (error) {
 				if (errorCatch(error) === 'jwt expired') removeFromStorage()

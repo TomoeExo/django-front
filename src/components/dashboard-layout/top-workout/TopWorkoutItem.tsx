@@ -9,8 +9,6 @@ export function TopWorkoutItem({
 	data,
 	isLoading
 }: WorkoutItemProps & { isFavorite: boolean }) {
-	console.log('data: ', data)
-
 	if (isLoading) {
 		return (
 			<div className='flex gap-5'>
@@ -47,25 +45,25 @@ export function TopWorkoutItem({
 							<div className='outline-1 outline outline-blue-50 w-20 h-16 flex items-center justify-center rounded-md sm:hidden'>
 								{isFavorite
 									? favorite?.title?.charAt(0) || 'A'
-									: favorite.workout?.title?.charAt(0) || 'A'}
+									: favorite?.title?.charAt(0) || 'A'}
 							</div>
 							<div className='flex items-center justify-between w-full sm:gap-5'>
 								<div>
 									<p className='text-lg font-medium'>
 										{isFavorite
 											? favorite?.title || 'Workout'
-											: favorite.workout?.title || 'Workout'}
+											: favorite?.title || 'Workout'}
 									</p>
 									<p className='font-medium text-sm sm:hidden'>
 										{isFavorite
 											? favorite?.type?.join(', ') || 'Type'
-											: favorite.workout?.type?.join(', ') || 'Type'}
+											: favorite?.type?.join(', ') || 'Type'}
 									</p>
 								</div>
 								<p className='min-w-20 flex justify-end sm:min-w-0'>
 									{isFavorite
 										? `${favorite?.duration} min.`
-										: `${Math.round(favorite?.totalSeconds / 60)} min.`}
+										: `${Math.round(favorite?.total_seconds / 60)} min.`}
 								</p>
 							</div>
 						</Link>

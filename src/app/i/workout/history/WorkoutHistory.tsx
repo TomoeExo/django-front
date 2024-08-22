@@ -6,12 +6,14 @@ import { DashboardHeader } from '@/components/dashboard-layout/header/DashboardH
 import { Heading } from '@/components/dashboard-layout/header/Heading'
 
 import { useCompleted } from '@/hooks/useCompleted'
+import { useWorkouts } from '@/hooks/useWorkouts'
 
 import CustomPagination from '../../exercise/CustomPagination'
 import { WorkoutCard } from '../WorkoutCard'
 
 export function WorkoutHistory() {
 	const { data: completedData, isLoading: completedLoading } = useCompleted()
+	const { data: workouts = [] } = useWorkouts()
 	const [currentPage, setCurrentPage] = useState(1)
 	const [workoutPerPage] = useState(9)
 
@@ -33,6 +35,11 @@ export function WorkoutHistory() {
 		window.scrollTo({ top: 0, behavior: 'smooth' })
 	}
 
+	// Create a map of workouts for easy access
+	const workoutMap = new Map(
+		workouts.map((workout: any) => [workout.id, workout])
+	)
+
 	return (
 		<>
 			<DashboardHeader
@@ -42,16 +49,19 @@ export function WorkoutHistory() {
 			<div className='mb-10'>
 				<Heading title='History' />
 				<div className='flex gap-5 ml-5 flex-wrap sm:ml-2'>
-					{currentWorkouts.map((completedWorkout: any, index: any) => (
-						<WorkoutCard
-							key={index}
-							item={{
-								...completedWorkout.workout,
-								totalSeconds: completedWorkout.totalSeconds,
-								completedAt: completedWorkout.completedAt
-							}}
-						/>
-					))}
+					{currentWorkouts.map((completedWorkout: any) => {
+						const workoutData: any = workoutMap.get(completedWorkout.workout)
+						return (
+							<WorkoutCard
+								key={completedWorkout.id}
+								item={{
+									...workoutData,
+									totalSeconds: completedWorkout.total_seconds,
+									completedAt: completedWorkout.completed_at
+								}}
+							/>
+						)
+					})}
 				</div>
 				<div>
 					{completedData.length > workoutPerPage && (

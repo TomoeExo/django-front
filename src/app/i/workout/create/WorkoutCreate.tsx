@@ -1,6 +1,7 @@
 'use client'
 
-import { Trash2 } from 'lucide-react'
+import { ImageUp, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import {
 	Controller,
 	SubmitHandler,
@@ -22,7 +23,6 @@ import {
 
 import { TypeWorkoutFormState } from '@/types/workout.types'
 
-import { ImageUpload } from '../../profile/ImageUpload'
 import { WorkoutField } from '../WorkoutField'
 import { WorkoutTextarea } from '../WorkoutTextarea'
 import { useCreateWorkout } from '../hooks/useCreateWorkout'
@@ -38,9 +38,28 @@ export function WorkoutCreate() {
 				duration: undefined,
 				tags: [],
 				completed: false,
-				exercises: [{ title: '', sets: undefined, reps: undefined }]
+				exercises: [{ title: '', sets: undefined, reps: undefined }],
+				workout_img: null
 			}
 		})
+
+	const [previewImage, setPreviewImage] = useState<string | null>(null)
+	const [imageFile, setImageFile] = useState<File | null>(null)
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0]
+		if (file) {
+			setImageFile(file)
+			const reader = new FileReader()
+			reader.onloadend = () => {
+				setPreviewImage(reader.result as string)
+			}
+			reader.readAsDataURL(file)
+		} else {
+			setImageFile(null)
+			setPreviewImage(null)
+		}
+	}
 
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -51,22 +70,26 @@ export function WorkoutCreate() {
 
 	const onSubmit: SubmitHandler<TypeWorkoutFormState> = async (data: any) => {
 		try {
-			const newData: TypeWorkoutFormState = {
-				...data,
-				exercises: data.exercises?.map((exercise: any) => ({
-					...exercise,
-					sets: parseInt(exercise.sets),
-					reps: parseInt(exercise.reps)
-				})),
-				duration: parseInt(data.duration),
-				tags:
-					typeof data.tags === 'string' && data.tags.length > 0
-						? data.tags.split(',').map((tag: any) => tag.trim())
-						: [],
-				type: Array.isArray(data.type) ? data.type : [data.type].filter(Boolean)
+			const formData = new FormData()
+
+			for (const [key, value] of Object.entries(data)) {
+				if (key === 'type' || key === 'tags' || key === 'exercises') {
+					formData.append(key, JSON.stringify(value))
+				} else if (key !== 'workout_img') {
+					formData.append(key, value as string | Blob)
+				}
 			}
 
-			createWorkout(newData)
+			if (imageFile) {
+				formData.append('workout_img', imageFile)
+			}
+
+			// Вывод formData в консоль
+			formData.forEach((value, key) => {
+				console.log(`${key}:`, value)
+			})
+
+			createWorkout(formData)
 			reset()
 		} catch (error) {
 			console.error('Error creating workout:', error)
@@ -297,13 +320,40 @@ export function WorkoutCreate() {
 						</Button>
 					</div>
 					<div className=' xl:-order-1'>
-						<ImageUpload
-							className='w-96 h-72 mt-8 bg-white text-COLORS-bg_color_app'
-							type='file'
-							folder='workouts'
-							image={'Image'}
-							onChange={() => '1'}
-						/>
+						<div className='flex items-start gap-4'>
+							{previewImage || '' ? (
+								<div className='w-64 h-64 rounded-2xl outline outline-2 outline-COLORS-stroke_main sm:w-52 sm:h-52 overflow-hidden'>
+									<img
+										src={previewImage || ''}
+										alt='Workout Image'
+										className='w-full h-full object-cover'
+									/>
+								</div>
+							) : (
+								<div className='w-64 h-64 rounded-2xl outline outline-2 outline-COLORS-stroke_main flex items-center justify-center sm:w-52 sm:h-52'>
+									<div className='flex flex-col capitalize text-center font-medium justify-center items-center gap-3 text-white/80'>
+										<ImageUp className='w-10 h-10' />
+										Upload image
+										<br />
+										for workout
+									</div>
+								</div>
+							)}
+
+							<label
+								htmlFor='workout_img'
+								className='text-white/80 font-medium cursor-pointer'
+							>
+								<ImageUp className='cursor-pointer' />
+								<input
+									type='file'
+									id='workout_img'
+									accept='image/*'
+									onChange={handleImageChange}
+									className='hidden'
+								/>
+							</label>
+						</div>
 					</div>
 				</form>
 			</div>

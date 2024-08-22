@@ -3,7 +3,7 @@ import { Noto_Sans } from 'next/font/google'
 
 import { Toaster } from '@/components/ui/toaster'
 
-import { SITE_NAME } from '@/constants/seo.constants'
+import { SITE_NAME } from '@/hooks/constants/seo.constants'
 
 import './globals.scss'
 import { Providers } from './providers'

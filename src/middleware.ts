@@ -6,11 +6,11 @@ import { EnumTokens } from './services/auth-token.service'
 export async function middleware(request: NextRequest, response: NextResponse) {
 	const { url, cookies } = request
 
-	const refreshToken = cookies.get(EnumTokens.REFRESH_TOKEN)?.value
+	const refresh = cookies.get(EnumTokens.REFRESH_TOKEN)?.value
 	const isDashboardPage = url.includes('/i')
 	const isAuthPage = url.includes('/auth')
 
-	if (isAuthPage && refreshToken) {
+	if (isAuthPage && refresh) {
 		return NextResponse.redirect(new URL(DASHBOARD_PAGES.HOME, url))
 	}
 
@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest, response: NextResponse) {
 		return NextResponse.next()
 	}
 
-	if (!refreshToken) {
+	if (!refresh) {
 		return NextResponse.redirect(new URL('/auth', request.url))
 	}
 

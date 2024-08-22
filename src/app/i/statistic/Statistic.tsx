@@ -27,7 +27,7 @@ export function Statistic() {
 		if (!completedLoading && completedData) {
 			const totalSessions = completedData.length
 			const totalSeconds = completedData.reduce(
-				(acc: any, workout: any) => acc + workout.totalSeconds,
+				(acc: any, workout: any) => acc + workout.total_seconds,
 				0
 			)
 			const averageTime = totalSessions ? totalSeconds / totalSessions : 0
@@ -45,6 +45,23 @@ export function Statistic() {
 		return `${mins > 0 ? mins + ' min ' : ''}${formattedSecs} sec`
 	}
 
+	const workoutMap = new Map(
+		(workoutData || []).map((workout: any) => [workout.id, workout])
+	)
+
+	const completedWorkoutsData = (slicedCompletedData || [])
+		.map((completed: any) => {
+			const workout = workoutMap.get(completed.workout)
+			return workout
+				? {
+						...workout,
+						total_seconds: completed.total_seconds,
+						completed_at: completed.completed_at
+					}
+				: null
+		})
+		.filter((workout: any) => workout !== null)
+
 	return (
 		<>
 			<DashboardHeader
@@ -60,7 +77,7 @@ export function Statistic() {
 					title='History'
 					linkHref={`/i/workout/history`}
 					workoutItemProps={{
-						data: slicedCompletedData,
+						data: completedWorkoutsData,
 						isLoading: completedLoading
 					}}
 				/>

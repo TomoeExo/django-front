@@ -38,12 +38,10 @@ export function RegisterForm() {
 	})
 
 	const onSubmit: SubmitHandler<IAuthForm> = data => {
-		console.log('data form: ', data)
-
 		mutate(data)
 	}
 
-	const repeatPassword = watch('repeat_password', '')
+	const repeatPassword = watch('password2', '')
 
 	const validatePasswordMatch = (value: string) => {
 		return value === repeatPassword || 'Passwords do not match'
@@ -65,7 +63,7 @@ export function RegisterForm() {
 						type='text'
 						id='username'
 						placeholder='Username'
-						{...register('name')}
+						{...register('username')}
 					/>
 				</div>
 				<div className='grid w-full max-w-md items-center gap-4 text-COLORS-placeholder'>
@@ -91,12 +89,12 @@ export function RegisterForm() {
 					/>
 				</div>
 				<div className='grid w-full max-w-md items-center gap-4 text-COLORS-placeholder'>
-					<Label htmlFor='repeat_password'>Repeat Password</Label>
+					<Label htmlFor='password2'>Repeat Password</Label>
 					<Input
 						type='password'
-						id='repeat_password'
+						id='password2'
 						placeholder='Repeat Password'
-						{...register('repeat_password', {
+						{...register('password2', {
 							required: 'Password confirmation is required',
 							validate: validatePasswordMatch
 						})}

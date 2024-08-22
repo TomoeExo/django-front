@@ -1,6 +1,8 @@
 'use client'
 
-import { Trash2 } from 'lucide-react'
+import { ImageUp, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import {
 	Controller,
 	SubmitHandler,
@@ -27,13 +29,13 @@ import { WorkoutTextarea } from '../../WorkoutTextarea'
 import { useUpdateWorkout } from '../../hooks/useUpdateWorkout'
 import { useWorkoutInitialData } from '../../useWorkoutInitialData'
 
-import { ImageUpload } from '@/app/i/profile/ImageUpload'
-
 export function WorkoutUpdate({ workoutId }: { workoutId: string }) {
 	const { register, handleSubmit, control, reset } =
 		useForm<TypeWorkoutFormState>()
 
+	const router = useRouter()
 	const { workoutData } = useWorkoutInitialData(reset, workoutId)
+	console.log(workoutData)
 
 	const { updateWorkout } = useUpdateWorkout()
 
@@ -42,49 +44,45 @@ export function WorkoutUpdate({ workoutId }: { workoutId: string }) {
 		name: 'exercises'
 	})
 
+	const [previewImage, setPreviewImage] = useState<string | null>(null)
+	const [imageFile, setImageFile] = useState<File | null>(null)
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0]
+		if (file) {
+			setImageFile(file)
+			const reader = new FileReader()
+			reader.onloadend = () => {
+				setPreviewImage(reader.result as string)
+			}
+			reader.readAsDataURL(file)
+		} else {
+			setImageFile(null)
+			setPreviewImage(null)
+		}
+	}
+
 	const onSubmit: SubmitHandler<TypeWorkoutFormState> = async (data: any) => {
 		try {
-			const updatedExercises = await Promise.all(
-				data.exercises.map(async (exercise: any) => {
-					if (exercise.id) {
-						return {
-							...exercise,
-							sets: parseInt(exercise.sets, 10),
-							reps: parseInt(exercise.reps, 10)
-						}
-					} else {
-						return {
-							title: exercise.title,
-							sets: parseInt(exercise.sets, 10),
-							reps: parseInt(exercise.reps, 10)
-						}
-					}
-				})
-			)
+			const formData = new FormData()
 
-			const updatedData: TypeWorkoutFormState = {
-				...data,
-				exercises: updatedExercises,
-				duration: parseInt(data.duration, 10),
-				tags:
-					typeof data.tags === 'string' && data.tags.length > 0
-						? data.tags.split(',').map((tag: any) => tag.trim())
-						: data.tags || [`${data.title}`],
-				type: Array.isArray(data.type)
-					? data.type
-					: [data.type].filter(Boolean),
-				level:
-					Array.isArray(data.level) && data.level.length > 0
-						? data.level[0]
-						: workoutData?.level || 'medium'
+			for (const [key, value] of Object.entries(data)) {
+				if (key === 'type' || key === 'tags' || key === 'exercises') {
+					formData.append(key, JSON.stringify(value))
+				} else if (key !== 'workout_img') {
+					formData.append(key, value as string | Blob)
+				}
+			}
+
+			if (imageFile) {
+				formData.append('workout_img', imageFile)
 			}
 
 			await updateWorkout({
 				workoutId: workoutId,
-				formData: updatedData
+				formData
 			})
-
-			reset()
+			router.push(`/i/workout/${workoutId}`)
 		} catch (error) {
 			console.error('Error updating workout:', error)
 		}
@@ -316,13 +314,44 @@ export function WorkoutUpdate({ workoutId }: { workoutId: string }) {
 						</Button>
 					</div>
 					<div className=' xl:-order-1'>
-						<ImageUpload
-							className='w-96 h-72 mt-8 bg-white text-COLORS-bg_color_app'
-							type='file'
-							folder='workouts'
-							image={'Image'}
-							onChange={() => '1'}
-						/>
+						<div className='flex items-start gap-4'>
+							{previewImage || workoutData?.workout_img ? (
+								<div className='w-64 h-64 rounded-2xl outline outline-2 outline-COLORS-stroke_main sm:w-52 sm:h-52 overflow-hidden'>
+									<img
+										src={
+											previewImage ||
+											(workoutData?.workout_img as string | undefined) ||
+											''
+										}
+										alt='Workout Image'
+										className='w-full h-full object-cover'
+									/>
+								</div>
+							) : (
+								<div className='w-64 h-64 rounded-2xl outline outline-2 outline-COLORS-stroke_main flex items-center justify-center sm:w-52 sm:h-52'>
+									<div className='flex flex-col capitalize text-center font-medium justify-center items-center gap-3 text-white/80'>
+										<ImageUp className='w-10 h-10' />
+										Upload image
+										<br />
+										for workout
+									</div>
+								</div>
+							)}
+
+							<label
+								htmlFor='workout_img'
+								className='text-white/80 font-medium cursor-pointer'
+							>
+								<ImageUp className='cursor-pointer' />
+								<input
+									type='file'
+									id='workout_img'
+									accept='image/*'
+									onChange={handleImageChange}
+									className='hidden'
+								/>
+							</label>
+						</div>
 					</div>
 				</form>
 			</div>

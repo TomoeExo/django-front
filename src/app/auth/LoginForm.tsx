@@ -14,8 +14,6 @@ import { useToast } from '@/components/ui/use-toast'
 
 import { IAuthForm } from '@/types/auth.types'
 
-import { DASHBOARD_PAGES } from '@/config/pages-url.config'
-
 import { authService } from '@/services/auth.service'
 
 export function LoginForm() {
@@ -29,12 +27,14 @@ export function LoginForm() {
 		mutationKey: ['auth'],
 		mutationFn: (data: IAuthForm) =>
 			authService.main(isLoginForm ? 'login' : 'register', data),
+
 		onSuccess() {
 			toast({
 				description: 'Successfully login!'
 			})
+
+			push('/i')
 			reset()
-			push(DASHBOARD_PAGES.HOME)
 		}
 	})
 

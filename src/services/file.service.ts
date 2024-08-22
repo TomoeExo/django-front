@@ -14,11 +14,14 @@ export const FileService = {
 		}
 		try {
 			const response = await axiosWithAuth.post<IFile>(
-				'/user/files',
+				`/media/${folder}/`,
 				file,
 				config
 			)
-			return response
+
+			const data = response.data?.file_url?.replace('\\', '/')
+
+			return data
 		} catch (error: any) {
 			throw new Error(error.response?.data?.message || 'Error uploading file')
 		}
